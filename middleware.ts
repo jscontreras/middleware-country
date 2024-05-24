@@ -1,15 +1,18 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { staticPaths } from './lib/SharedStaticPaths';
+import { get } from '@vercel/edge-config';
 
-export function middleware(request: NextRequest) {
+
+export async function middleware(request: NextRequest) {
+  const countries: readonly string[] = await get('countries') || [];
   const url = request.nextUrl;
   const response = NextResponse.next();
 
   if (url.pathname === '/') {
     const requestHeaders = new Headers(request.headers);
     const country = requestHeaders.get('X-Vercel-IP-Country') || '';
-    if (staticPaths.countries.some( co => (co.toUpperCase() == country.toUpperCase()))) {
+    console.log('country', country)
+    if (countries.some( co => (co.toUpperCase() == country.toUpperCase()))) {
       return NextResponse.rewrite(new URL(`/${country}/`, request.url));
     }
   }
