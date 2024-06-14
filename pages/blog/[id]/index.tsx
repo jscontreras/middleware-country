@@ -44,15 +44,18 @@ export async function getStaticPaths() {
 // It may be called again, on a serverless function, if
 // revalidation is enabled and a new request comes in
 export async function getStaticProps(context) {
-  const id = context.params?.id || '1';
+  const id = `${context.params?.id}` || '1';
   let usedPath = id;
 
   // check if the path is hased path
-  const longUrls: readonly any[] = await get('longUrls') || [];
-  const createdMap = new Map(longUrls.map(obj => [obj.h, obj.u]));
-  if (createdMap.has(id)) {
-    usedPath = createdMap.get(id);
+  if(id.startsWith('hash--')){
+    const longUrls: readonly any[] = await get('longUrls') || [];
+    const createdMap = new Map(longUrls.map(obj => [obj.h, obj.u]));
+    if (createdMap.has(id)) {
+      usedPath = createdMap.get(id);
+    }
   }
+
   const post = await getPost(usedPath.length);
 
   return {
