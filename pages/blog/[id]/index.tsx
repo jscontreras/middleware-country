@@ -14,6 +14,11 @@ export default function BlogPage({ id, post, usedPath }) {
   );
 }
 
+/**
+ * Get a Lorem Impsum Post based onPost ID (Testing API)
+ * @param postId
+ * @returns
+ */
 async function getPost(postId: number) {
   const resLorem = await fetch(
     `https://jsonplaceholder.typicode.com/posts/${postId}`,
@@ -22,33 +27,44 @@ async function getPost(postId: number) {
 }
 
 
-// This function gets called at build time on server-side.
-// It may be called again, on a serverless function, if
-// the path has not been generated.
+/**
+ * This function gets called at build time on server-side.
+ * It may be called again, on a serverless function, if
+ * the path has not been generated.
+ * @returns
+ */
 export async function getStaticPaths() {
-  // const res = await fetch('https://.../posts')
-  // const posts = await res.json()
-  const posts = [{ id: "2" }]
+  // The initial list of paths to process on build time
+  const buildPages = ['/blog/blog-1', '/blog/blog-2', '/blog/blog-3'];
+
+  // Read collection of long paths from local storage (get the hashed urls)
+  const longUrls: readonly any[] = await get('longUrls') || [];
+
   // Get the paths we want to pre-render based on posts
-  const paths = posts.map((post) => ({
-    params: { id: post.id },
+  const hashedPaths = longUrls.map((post) => ({
+    params: { id: post.h },
   }))
 
   // We'll pre-render only these paths at build time.
   // { fallback: 'blocking' } will server-render pages
   // on-demand if the path doesn't exist.
-  return { paths, fallback: 'blocking' }
+  return { paths: [...hashedPaths, ...buildPages], fallback: 'blocking' }
 }
 
-// This function gets called at build time on server-side.
-// It may be called again, on a serverless function, if
-// revalidation is enabled and a new request comes in
+/**
+ * This function gets called at build time on server-side.
+ * It may be called again, on a serverless function, if
+ * revalidation is enabled and a new request comes in
+ * @param context
+ * @returns
+ */
+
 export async function getStaticProps(context) {
   const id = `${context.params?.id}` || '1';
   let usedPath = id;
 
   // check if the path is hased path
-  if(id.startsWith('hash--')){
+  if (id.startsWith('hash--')) {
     const longUrls: readonly any[] = await get('longUrls') || [];
     const createdMap = new Map(longUrls.map(obj => [obj.h, obj.u]));
     if (createdMap.has(id)) {
