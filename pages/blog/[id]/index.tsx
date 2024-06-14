@@ -1,11 +1,10 @@
-// Serverless Memory globally scoped variables
-let largePaths = [];
+import { get } from '@vercel/edge-config';
 
 export default function BlogPage({ id, post, usedPath }) {
   return (
     <>
       <h1>Long URLs POC</h1>
-      <h2>{`[${id.length}] ${post.title}`}</h2>
+      <h2>{`[${usedPath.length}] ${post.title}`}</h2>
       <h3>{`Path used to Fetch Data: ${usedPath}`}</h3>
       <h3>{`Path used In Vercel: /blog/${id}`}</h3>
       <p>
@@ -47,12 +46,14 @@ export async function getStaticPaths() {
 export async function getStaticProps(context) {
   const id = context.params?.id || '1';
   let usedPath = id;
-  const post = await getPost(id.length);
 
-  // check if the url is too long
-  if (usedPath.length > 30) {
-    console.log(usedPath);
+  // check if the path is hased path
+  const longUrls: readonly any[] = await get('longUrls') || [];
+  const createdMap = new Map(longUrls.map(obj => [obj.h, obj.u]));
+  if (createdMap.has(id)) {
+    usedPath = createdMap.get(id);
   }
+  const post = await getPost(usedPath.length);
 
   return {
     props: {
