@@ -11,7 +11,7 @@ export async function middleware(request: NextRequest) {
   if (url.pathname === '/') {
     const requestHeaders = new Headers(request.headers);
     const country = requestHeaders.get('X-Vercel-IP-Country') || '';
-    if (countries.some( co => (co.toUpperCase() == country.toUpperCase()))) {
+    if (countries.some(co => (co.toUpperCase() == country.toUpperCase()))) {
       return NextResponse.rewrite(new URL(`/${country}/`, request.url));
     }
   }
@@ -28,10 +28,10 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
     '\/',
-    [1,2,3,4,5,6,7,8,9,10].map((i) => {
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => {
       return `\/bog\/${i}`
-    })
+    }),
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 }
