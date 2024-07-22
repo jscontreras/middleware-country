@@ -17,7 +17,20 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // assuming /permanent is a 308 redirect type
+  if(url.pathname.startsWith('/permanent')) {
+    return NextResponse.redirect(new URL(`/blog/1`, request.url), 308);
+  }
+
   if (url.pathname.startsWith('/blog')) {
+    const requestHeaders = new Headers(request.headers);
+    let headers: { [key: string]: string } = {};
+    requestHeaders.forEach((value, key) => {
+      headers[`${key}`] = value;
+    });
+    // Print headers and url
+    //console.log('#######', headers, request.nextUrl.host, request.nextUrl.pathname);
+
     const longUrls: readonly any[] = await get('longUrls') || [];
     if (!createdMap) {
       createdMap = new Map(longUrls.map(obj => [obj.u, obj.h]));
@@ -42,8 +55,12 @@ export const config = {
      * - favicon.ico (favicon file)
      */
     '\/',
+    '\/permanent',
     //only runs on blog slugs longer than 30
-    `\/blog/(.........................+)`,
-    '/((?!api|_next/static/.*|_next/image/.*|favicon.ico|blog/....))',
+    // `\/blog/(.........................+)`,
+    // '/((?!api|_next/static/.*|_next/image/.*|favicon.ico|blog/....))',
+    `\/blog/(.+)`,
+    '/((?!api|_next/static/.*|_next/image/.*|favicon.ico))',
   ],
 }
+

@@ -71,7 +71,7 @@ export async function getStaticProps(context) {
       usedPath = createdMap.get(id);
     }
   }
-
+  // Fetching using the page slug
   const post = await getPost(usedPath.length);
 
   return {
